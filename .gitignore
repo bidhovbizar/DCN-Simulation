@@ -1,5 +1,10 @@
 # Ignore everything
 *
+#But decend into directories
+!*/
+
+# Recursively allow files under subtree
+!/PythonCode/*.py
 
 # But not these files...
 !*.bib
