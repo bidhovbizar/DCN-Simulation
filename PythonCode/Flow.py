@@ -1,31 +1,45 @@
-from Node import Node
-from Host import Host
-from SourceDestination import SourceDestination
-
 class Flow:
-    def __init__(self,_id, sourceDestinationID, pathID, arrivalTime, isMice, lifeTime, bandWidth, path):
+
+    def __init__(self,_id, sourceDestinationID, arrivalTime, path):
+    
         self._id                    = _id
-        
         self.sourceDestinationID    = sourceDestinationID
-        self.pathID                 = pathID
-        
         self.arrivalTime            = arrivalTime
-        self.departureTime          = arrivalTime + lifeTime
-        self.excessTime             = self.updateExcessTime(arrivalTime)
 
-        self.isMice                 = isMice
-        self.lifeTime               = lifeTime
-        self.bandWidth              = bandWidth
-            
+        self.path                   = path
+                
     def __repr__(self):
-         return '<Flow _id: %s, sourceDestinationID: %s, pathID: %s\n\
-                arrivalTime: %s, departureTime: %s, excessTime: %s\n\
-                isMice: %s, lifeTime: %s, bandwidth: %s, path: %s\n>' %(
-                self._id, self.sourceDestinationID, self.pathID,
-                self.arrivalTime, self.departureTime, self.excessTime,
-                self.isMice, self.lifeTime, self.bandwidth,   self.path)
+         return '<Flow _id: %s, sourceDestinationID: %s, pathID: %s, arrivalTime: %s,\n\
+                 path: %s>' %(
+                self._id, self.sourceDestinationID, self.pathID, self.arrivalTime,
+                self.path)
+           
+class MiceFlow(Flow):
+    
+    def __init__(self, _id, sourceDestinationID, arrivalTime, path, miceParameters):
+        Flow.__init__(self, _id, sourceDestinationID, arrivalTime, path)
+        self.bandwidth      = miceParameters.bandwidth
+        self.lifeTime       = miceParameters.lifeTime.getDuration()
+        self.departureTime  = self.arrivalTime + self.lifeTime
 
+    def __rept__(self):
+        return '%s\n\
+                <MiceFlow bandwidth: %s, lifeTime: %s, departureTime: %s\n>' %(
+                Flow.__repr__(self),
+                self.bandwidth, self.lifeTime, self.departureTime)
+        
 
-    def updateExcessTime(self, eventTime):
-            self.eventTime  = eventTime
-            self.excessTime = self.departureTime - self.eventTime
+class ElephantFlow(Flow):
+    
+    def __init__(self, _id, sourceDestinationID, arrivalTime, path, elephantParameters):
+        Flow.__init__(self, _id, sourceDestinationID, arrivalTime, path)
+        self.bandwidth      = elephantParameters.bandWidth
+        self.lifeTime       = elephantParameters.lifeTime.getDuration()
+        self.departureTime  = self.arrivalTime + self.lifeTime
+
+    def __rept__(self):
+        return '%s\n\
+                ElephantFlow bandwidth: %s, lifeTime: %s, departureTime: %s\n>' %(
+                Flow.__repr__(self),
+                self.bandwidth, self.lifeTime, self.departureTime)
+        

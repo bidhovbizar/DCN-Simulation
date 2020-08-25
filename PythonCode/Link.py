@@ -1,75 +1,72 @@
-from Node import Node
-from Host import Host
-from Edge import Edge
-from Aggregation import Aggregation
-from Core import Core
+from Node import Node,Host,Edge,Agg,Core
+from SystemParameters import SystemParameters
 
 class Link:
-    def __init__(self, _id, egress, ingress, bandwidth, bufferSize = 0, delay = 0 ):
+    
+        # Characterisation of Links
+        #_type=0 -> hostEdgeLink
+        #_type=1 -> edgeAggLink
+        #_type=2 -> aggCoreLink
+        #_type=3 -> coreAggLink
+        #_type=4 -> aggEdgeLink
+        #_type=5 -> edgeHostLink
+    def __init__(self, _id, input, output, bandwidth, _type, bufferSize = 0, delay = 0 ):
         self._id                = _id
-        self.egress             = egress
-        self.ingress            = ingress
-        
+        self.input              = input
+        self.output             = output
+        self.bandwidth          = bandwidth
+        self._type              = _type
         self.bufferSize         = bufferSize
         self.delay              = delay
-        self.bandwidth          = bandwidth
-        self.bandwidthUtilized  = 0 
+
+        self.bandwidthUtilized  = 0
         self.flowList           = []
         
     def __repr__(self):
-        return '<Links _id: %s, egress: %s, ingress: %s,\n\
-                 bufferSize: %s, delay: %s, bandwidth: %s, flowList: %s\n>' %(
-                 self._id, self.egress, self.ingress,
-                 self.bufferSize, self.delay, self.bandwidth, self.flowList)
-
-class HostEdgeLink(Link):
-    
-    def __init__(self, _id, egress, ingress, bandwidth, flowList = []):
-        Link.__init__(self, _id, egress, ingress, bandwidth, flowList)
-
-    def __repr__(self):
-        return '<%s>\n %s' %(HostEdgeLink.__name__, Link.__repr__(self))
+        if(self._type == 0):
+            return '<Links _id: %s,\n Host : %s, Edge: %s,\n\
+ bufferSize: %s, delay: %s, bandwidth: %s, bandwidthUtilization: %s,\n\
+ flowList: %s\n>' %(
+                self._id, self.input._id, self.output._id,
+self.bufferSize, self.delay, self.bandwidth, self.bandwidthUtilized,
+self.flowList)
         
-
-class EdgeHostLink(Link):
-     def __init__(self, _id, egress, ingress, bandwidth, flowList = []):
-        Link.__init__(self, _id, egress, ingress, bandwidth, flowList)
-       
-    def __repr__(self):
-        return '<%s>\n %s' %(EdgeHostLink.__name__, Link.__repr__(self))
-        
-class EdgeAggregationLink(Link):
-    
-    def __init__(self, _id, egress, ingress, bandwidth, flowList = []):
-        Link.__init__(self, _id, egress, ingress, bandwidth, flowList)
-
-    def __repr__(self):
-        return '<%s>\n %s' %(EdgeAggregationLink.__name__, Link.__repr__(self))
-    
-class AggregationEdgeLink(Link):
-    
-    def __init__(self, _id, egress, ingress, bandwidth, flowList = []):
-        Link.__init__(self, _id, egress, ingress, bandwidth, flowList)
-
-    def __repr__(self):
-        return '<%s>\n %s' %(AggregationEdgeLink.__name__, Link.__repr__(self))
-    
-class AggregationCoreLink(Link):
-    
-    def __init__(self, _id, egress, ingress, bandwidth, flowList = []):
-        Link.__init__(self, _id, egress, ingress, bandwidth, flowList)
-
-    def __repr__(self):
-        return '<%s>\n %s' %(AggregationCoreLink.__name__, Link.__repr__(self))
-
-class CoreAggregationLink(Link):
-    
-    def __init__(self, _id, egress, ingress, bandwidth, flowList = []):
-        Link.__init__(self, _id, egress, ingress, bandwidth, flowList)
-
-     def __repr__(self):
-        return '<%s>\n %s' %(CoreAggregationLink.__name__, Link.__repr__(self))
-
-
-
-
+        elif(self._type == 1):
+            return '<Links _id: %s,\n Edge : %s, Agg: %s,\n\
+ bufferSize: %s, delay: %s, bandwidth: %s, bandwidthUtilization: %s,\n\
+ flowList: %s\n>' %(
+                self._id, self.input._id, self.output._id,
+self.bufferSize, self.delay, self.bandwidth, self.bandwidthUtilized,
+self.flowList)
+ 
+        elif(self._type == 2):
+             return '<Links _id: %s,\n Agg : %s, Core: %s,\n\
+ bufferSize: %s, delay: %s, bandwidth: %s, bandwidthUtilization: %s,\n\
+ flowList: %s\n>' %(
+                self._id, self.input._id, self.output._id,
+self.bufferSize, self.delay, self.bandwidth, self.bandwidthUtilized,
+self.flowList)
+ 
+        elif(self._type == 3):
+            return '<Links _id: %s,\n Core : %s, Agg: %s,\n\
+ bufferSize: %s, delay: %s, bandwidth: %s, bandwidthUtilization: %s,\n\
+ flowList: %s\n>' %(
+                self._id, self.input._id, self.output._id,
+self.bufferSize, self.delay, self.bandwidth, self.bandwidthUtilized,
+self.flowList)
+ 
+        elif(self._type == 4):
+            return '<Links _id: %s,\n Agg : %s, Edge: %s,\n\
+ bufferSize: %s, delay: %s, bandwidth: %s, bandwidthUtilization: %s,\n\
+ flowList: %s\n>' %(
+                self._id, self.input._id, self.output._id,
+self.bufferSize, self.delay, self.bandwidth, self.bandwidthUtilized,
+self.flowList)
+ 
+        elif(self._type == 5):
+            return '<Links _id: %s,\n Edge : %s, Host: %s,\n\
+ bufferSize: %s, delay: %s, bandwidth: %s, bandwidthUtilization: %s,\n\
+ flowList: %s\n>' %(
+                self._id, self.input._id, self.output._id,
+self.bufferSize, self.delay, self.bandwidth, self.bandwidthUtilized,
+self.flowList)

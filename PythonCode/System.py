@@ -1,45 +1,37 @@
 import numpy as np
 import random
-from Arrival import Arrival
-from Lifetime import Lifetime
-from ShiftedExponentialLifeTime import ShiftedExponentialLifeTime
-from ShiftedParetoLifeTime import ShiftedParetoLifeTime
-from Topology import Topology
-from FatTreeTopology import FatTreeTopology
-from Flow import Flow
+from Topology import Topology,FatTreeTopology
+from Flow import MiceFlow,ElephantFlow 
 from Path import Path
-from Node import Node
-from Host import Host
-from Edge import Edge
-from Aggregation import Aggregation
-from Core import Core
 from SourceDestination import SourceDestination
+from SystemParameters import SystemParameters
+from Arrival import Arrival, ExponentialArrival
 
-class System(SystemParameters, FatTreeTopology, Controller):
+class System:
 
-
-    def __init__(self, flowArrivalRate, serviceType, probElephantFlow, 
-				 elephantBandWidth, miceBandwidth, elephantServiceShift,
-				 elephantServiceMean, miceServiceShift, miceServiceMean, 
-				 numPorts, hostList, connectivityMatrix):
+    def __init__(self, flowArrivalRate, probElephantFlow,
+				 elephantBandwidth, elephantServiceShift, elephantServiceMean, elephantServiceType,
+                 miceBandwidth, miceServiceShift, miceServiceMean, miceServiceType,
+                 hostEdgeBandwidth, edgeAggBandwidth, aggCoreBandwidth, coreAggBandwidth, aggEdgeBandwidth, edgeHostBandwidth,
+				 numPorts):
         
-        SystemParameters.__init__(self,flowArrivalRate, serviceType, probElephantFlow,
-    								  elephantBandWidth, miceBandwidth, elephantServiceShift, 
-    								  elephantServiceMean, miceServiceShift, miceServiceMean, 
-    								  numPorts, hostList, connectivityMatrix)
-        Controller.__init__(self,numPorts)
+        self.systemParameters = SystemParameters(flowArrivalRate, probElephantFlow,
+				 elephantBandwidth, elephantServiceShift, elephantServiceMean, elephantServiceType,
+                 miceBandwidth, miceServiceShift, miceServiceMean, miceServiceType,
+                 hostEdgeBandwidth, edgeAggBandwidth, aggCoreBandwidth, coreAggBandwidth, aggEdgeBandwidth, edgeHostBandwidth)
         
-        # FatTreeTopology inherits Topology
-        FatTreeTopology.__init__(self,numPorts)
-    
-        lifeTimeObjectMice		    = LifeTime(True, mean, shift)
-        LifeTimeObjectElephant 		= LifeTime(False, mean, shift)
+        self.topology = FatTreeTopology(self.systemParameters, numPorts = 4)
 
-        self.flowList           = []
-    
         self.eventTime          = 0
-        self.arrival            = Arrival(self.SystemParameters.arrivalRate)
-        self.nextArrivalTime    = self.arrival.getDuation()
+        self.activeFlowList     = []
+        self.numFlows           = 0
+        self.lastPathList       = []
+        
+        self.arrival            = Arrival(systemParameters.flowArrivalRate)
+        self.elephantParameters = systemParameters.elephant
+        self.miceParameters     = systemParameters.mice
+
+        self.nextArrivalTime    = 0
         self.nextDepatureTime   = 'inf' # this would depend on type of the flow so let this be default
         
         if self.nextArrivalTime < self.nextDepatureTime:
@@ -51,77 +43,55 @@ class System(SystemParameters, FatTreeTopology, Controller):
 
         return '%s,\n\
                 %s,\n\
-                %s,\n\
-                <# Flow in flowList: %s,\n\
-                EventTime: %s, Arrival: %s, nextArrivalTime: %s, nextDepartureTime: %s\n>' %(
+                <System # Flow in activeFlowList: %s,\n\
+                lastPathList: %s,\n\
+                nextArrivalTime: %s, nextDepartureTime: %s\n>' %(
                 SystemParameters.__repr__(self),
-                Controller.__repr__(self),
                 FatTreeTopology.__repr__(self),
-                len(self.flowList),
-                self.eventTime, self.arrival, self.nextArrivalTime, self.nextDepatureTime)
+                len(self.activeFlowList),
+                self.lastPathList,
+                self.nextArrivalTime, self.nextDepatureTime)
 
     # Check whether to shift to State
     def updateAtArrival(self):
-        self.arrivalNewFlow()
+        newFlowId       = self.numFlows
 
-    # Check whether to shift to State
-    def updateAtDeparture(self):
-        # update the state of the varibles at the departure of an old flow
+        srcDestDict     = random.choice(self.topology.sourceDestinationDictionary)
         
-    def assignTotalFlowInSystem(self,numFlows):
-        self.numFlows	= numFlows
-        
-    def arrivalNewFlow(self, _typeService = 0, _typePath = 0, _typeSourceDestination = 0):
-		# _typeService decides the  serviceType of distribution
-        # 0 shiftedExponential
-        # 1 shiftedPareto
-		
-		# calculating the flow id of new flow
-		_id 						= len(self.flowList)+1
-		
-        # finding the source and destination 
-        sourceDestinationID         = self.sourceDestinationList[self.findSourceDestinaition()].index()
+        srcDestId       =  self.topology.sourceDestinationList[self.topology.findSourceDestination(_typeSourceDestination = 0)].index()
         
         #_typePath decides how is the next path assigned for the sourceDestination Pair
         # We can assign _typePath in 3 ways
         # 0 Random : use indexOfPath
         # 1 Round Robin
         # 2 Load Aware
-		
-        pathID                      = Controller.assignPath(sourceDestination, _typePath = 0)
-		
-        # arrivalTime 
-		lastFlowArrived 			= self.flowList[-1].arrivalTime
-		arrivalTime 				= lastFlowArrived + self.arrival.getDuration()
-		
-		#checking sample elephant or mice flow
-        if (np.random.binomial(size=1, n=1, p= self.probElephantFlow) == 1):
-            isMice = False
-		else:
-			isMice = True
-            
-		# setting lifeTime and bandwidth of the flow	
-        if (isMice == True):
-            if  (_typeService == 0):
-                lifeTimeOfMice          = ShiftedExponentialLifeTime(lifeTimeObjectMice.isMice, lifeTimeObjectMice.mean, lifeTimeObjectMice.shift)
-            elif(_typeService == 1):
-                lifeTimeOfMice          = ShiftedParetoLifeTime(lifeTimeObjectMice.isMice, lifeTimeObjectMice.mean, lifeTimeObjectMice.shift)
-            lifeTime	 			    = lifeTimeOfMice.getDuration()
-            bandwidth 				= self.miceBandwidth
+        pathID                   = random.choice(srceDest.pathList)
+        path                     = Path
+        
 
+        if random.random() <= probElephantFlow:
+            newFlow     = ElephantFlow(newFlowId, srcDestId, self.nextArrivalTime, path, self.elephantParameters)
         else:
-            if  (_typeService == 0):
-                lifeTimeOfElephant          = ShiftedExponentialLifeTime(lifeTimeObjectElephant.isMice, lifeTimeObjectElephant.mean, lifeTimeObjectElephant.shift)
-            elif(_typeService == 1):
-                lifeTimeOfElephant          = ShiftedParetoLifeTime(lifeTimeObjectElephant.isMice, lifeTimeObjectElephant.mean, lifeTimeObjectElephant.shift)
-            lifeTime 				= lifeTimeElephant.getDuration()
-            bandwidth 				= self.elephantBandWidth
-		
-		#create a new flow
-		newFlow						= Flow(_id, sourceDestinationID, pathID, arrivalTime, 
-											isMice, lifeTime, bandWidth)
-		
-		self.flowList.append(newflow)
+            newFlow     = MiceFlow(newFlowId,srcDestId, self.nextArrivalTime, path, self.miceParameters)
+        #checking sample elephant or mice flow
+#        if (np.random.binomial(size=1, n=1, p= self.SystemParameters.probElephantFlow) == 1):
+#            #isMice = False
+#            newFlow                    = ElephantFlow(_id, sourceDestinationID, self.nextArrivalTime, self.Topology.sourceDestinationDictionary[sourceDestinationID].pathList[pathID], self.SystemParameters)
+#        
+#        else:
+#            #isMice = True
+#            newFlow                 = MiceFlow(_id, sourceDestinationID, self.nextArrivalTime, self.Topology.sourceDestinationDictionary[sourceDestinationID].pathList[pathID], self.SystemParameters)
+        
+        self.activeFlowList.append(newflow)
+        self.numFlows       += 1
+        self.nextArrivalTime+= self.arrival.getDuation()
+
+    # Check whether to shift to State
+    def updateAtDeparture(self):
+        # update the state of the varibles at the departure of an old flow
+        
+    def arrivalNewFlow(self, _typePath = 0, _typeSourceDestination = 0):
+
         
         
     def findSourceDestination(self, _typeSourceDestination = 0, source = 0, destination = 0)
@@ -129,7 +99,17 @@ class System(SystemParameters, FatTreeTopology, Controller):
         if (_typeSourceDestination = 0):
             return random.sample(range(self.numSourceDestinationPair),1)
         
-    def findLastFlowLeft(self,flowList):
+	def assignPath(self, sourceDestination, _typePath):
+            # By default the _typePath is set to 0 i.e. Random
+            pathID                             = self.Topology.findPathID(_typePath)
+            self.lastPathList                  = self.updateLastPath(sourceDestination, pathID)
+            return pathID
+
+    def updateLastPath(self,sourceDestination, pathID):
+        # Receives the last path and goes to self.lastPathList and update the last path chosen for round robin
+
+        
+    def findLastFlowLeft(self,activeFlowList):
         #find the time when the last flow leave the system or time when we stop observing
     
     def plotCountPackets(t1,t2):
