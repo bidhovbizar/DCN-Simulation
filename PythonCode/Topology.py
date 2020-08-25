@@ -1,6 +1,8 @@
 import random
 from Link import Link
 from Node import Host, Edge, Agg, Core
+from SourceDestination import SourceDestination
+from Path import Path
 
 class Topology:
     def __init__(self):
@@ -39,12 +41,13 @@ class FatTreeTopology(Topology):
         self.createEdgeHostLinks()
         
         # Source Destination and its correspoding Paths
-        self.sourceDestinationDictionary= self.populateSourceDestination(self.hostList)
-       
+        self.createSourceDestination(self.hostList)
+        #self.sourceDestinationDictionary = {}
         
     def __repr__(self):
         return '%s\n <FatTreeTopology NumPorts: %s,\n\
                 NumHosts: %s, NumEdges: %s, NumAggs: %s, NumCores: %s,\n\
+                NumSourceDestinationPair: %s, NumPaths: %s,\n\
                 # Hosts in HostList: %s,\n\
                 # Edges in EdgeList: %s,\n\
                 # Aggs in AggList: %s,\n\
@@ -58,6 +61,7 @@ class FatTreeTopology(Topology):
                 # Pairs of SourceDestination: %s\n>' %(
                 Topology.__repr__(self),self.numPorts,
                 self.numHosts, self.numEdges, self.numAggs, self.numCores,
+                self.numSourceDestinationPair, self.numPaths,
                 len(self.hostList), len(self.edgeList), len(self.aggList), len(self.coreList),
                 len(self.hostEdgeLinks), len(self.edgeAggLinks), len(self.aggCoreLinks),
                 len(self.coreAggLinks), len(self.aggEdgeLinks), len(self.edgeHostLinks), 
@@ -92,9 +96,8 @@ class FatTreeTopology(Topology):
             for agg in connectedAggList:
                 podAggId            = agg._id - (self.numPorts/2) * podId
                 linkId              = ((self.numPorts/2)**2 * podId) + ((self.numPorts/2)* podEdgeId) + podAggId 
-                self.edgeAggLinks.append( Link(linkId, edge, connectedAggList[podAggId], self.systemParameters.linkBandwidth.edgeAgg, 1))
-                edge.setAgg(connectedAggList[podAggId])
-                # We can replace connectedAggList[podAggId] with just agg it would still work
+                self.edgeAggLinks.append( Link(linkId, edge, agg, self.systemParameters.linkBandwidth.edgeAgg, 1))
+                edge.setAgg(agg)
                 
 
     def createAggCoreLinks(self):
@@ -121,16 +124,15 @@ class FatTreeTopology(Topology):
     def createAggEdgeLinks(self):
         self.aggEdgeLinks           = []
         divisor                     = self.numPorts/2
-        for edge in self.edgeList:
-            podId                       = edge._id/divisor
-            connectedAggList  = [agg for agg in self.aggList if (agg._id/divisor) == podId]
-            podEdgeId   = edge._id - (self.numPorts/2) * podId
-            for agg in connectedAggList:
-                podAggId    = agg._id - (self.numPorts/2) * podId
-                linkId      = ((self.numPorts/2)**2 * podId) + ((self.numPorts/2)* podEdgeId) + podAggId 
-                self.aggEdgeLinks.append( Link(linkId, connectedAggList[podAggId], edge, self.systemParameters.linkBandwidth.aggEdge, 4))
-                connectedAggList[podAggId].setEdge(edge)
-        
+        for agg in self.aggList:
+            podId                       = agg._id/divisor
+            connectedEdgeList  = [edge for edge in self.edgeList if (edge._id/divisor) == podId]
+            podAggId   = agg._id - (self.numPorts/2) * podId
+            for edge in connectedEdgeList:
+                podEdgeId    = edge._id - (self.numPorts/2) * podId
+                linkId      = ((self.numPorts/2)**2 * podId) + ((self.numPorts/2)* podAggId) + podEdgeId 
+                self.aggEdgeLinks.append( Link(linkId, agg, edge, self.systemParameters.linkBandwidth.aggEdge, 4))
+                agg.setEdge(edge)        
         
     def createEdgeHostLinks(self):
         self.edgeHostLinks  = []
@@ -143,17 +145,21 @@ class FatTreeTopology(Topology):
             connectedEdge.setHost(host)
             self.edgeHostLinks.append(edgeHostLink)
 
-    def populateSourceDestination(self, numHosts):
-        return {}
-        # return a dictionary of all source destination pair
-        # "Source_id" + "Destination_id" + "j \in Path"
-        # for every source find all the remaining destination and create sourceDestinationDictionary by appending them
+    def createSourceDestination(self, numHosts):
+        self.sourceDestinationDictionary = {}
+        for source in self.hostList:
+            for dest in self. hostList:
+                if(source == dest):
+                    continue
+                sourceDestId     = str(source._id)+ ':' +str(dest._id)
+                newSourceDestPair = SourceDestination(sourceDestId, source, dest)
+                [newSourceDestPair.addPath(
+                        self.populateSourceDestinationPath(newSourceDestPair, self.numPaths, pathId)
+                        ) for pathId in range(self.numPaths)]                
+                self.sourceDestinationDictionary.update({sourceDestId : newSourceDestPair})
         
-        # for every sourceDestination in sourceDestinationDictionary populate the pathsList of object path and index from 0 to self.numpath-1
-        # E.g. self.sourceDestinationDictionary[i].pathList[j] = self.populateSourceDestinationPaths(soureDestination,self.numPaths)
         
-    def populateSourceDestinationPaths(self,sourceDestination,numPaths):
-        return 0
+    def populateSourceDestinationPath(self, sourceDestination, numPaths, pathId):
 #        # generate all the possible paths from source to destination for all source to all destination
 #        # Find all paths for {(host1,host2) \in hostList \times hostList \setminus (host,host)}
 #        # Use encoding technique of bin(source._id)+bin(destination.id)+indexOfPath
@@ -166,29 +172,37 @@ class FatTreeTopology(Topology):
 #
 #        self.sourceDestinationDictionary[sourceDestination._id].pathList[indexOfPath].coreToAgg 			= self.findCoreToAggLink(destination)
 #        self.sourceDestinationDictionary[sourceDestination._id].pathList[indexOfPath].aggToEdge 			= self.findAggToEdgeLink(destination)
-#        self.sourceDestinationDictionary[sourceDestination._id].pathList[indexOfPath].edgeToDestination 	     = self.findEdgeToDestinationLink(destination)
-
-    def findSourceToEdgeLink(self,source):
+#        self.sourceDestinationDictionary[sourceDestination._id].pathList[indexOfPath].edgeToDestination 	     = self.findEdgeToDestinationLink(destination)          
+        sourceEdgeLink  = self.findSourceToEdgeLink(sourceDestination.source)
+        edgeAggLink     = self.findEdgeToAggLink(sourceDestination.source, pathId)
+        aggCoreLink     = self.findAggToCoreLink(sourceDestination.source, pathId)
+        coreAggLink     = self.findCoreToAggLink(sourceDestination.destination)
+        aggEdgeLink     = self.findAggToEdgeLink(sourceDestination.destination)
+        edgeDestLink    = self.findEdgeToDestinationLink (sourceDestination.destination)
+        newPath = Path(sourceDestination._id, pathId, sourceEdgeLink, edgeAggLink, aggCoreLink, coreAggLink, aggEdgeLink, edgeDestLink)
+        return newPath
+    
+    def findSourceToEdgeLink(self, source):
         return source._id
         # As per the indexing the source id will be the link id
         
     
-    def findEdgeToAggLink(self,source, indexOfPath):
-        return 0 
+    def findEdgeToAggLink(self, source, indexOfPath):
+        return None 
         # Find the link between edge and agg, this depends on the source and random path available
         # Find the link between edge and agg, this depends on the random path available
-    def findAggToCoreLink(self,source,indexOfPath):
-        return 0
+    def findAggToCoreLink(self, source, indexOfPath):
+        return None
     		
-    def findCoreToAggLink(self,destination):
-        return 0
+    def findCoreToAggLink(self, destination):
+        return None
         # Find the link between core and agg, this depends on the destination
     
-    def findAggToEdgeLink(self,destination):
-        return 0
+    def findAggToEdgeLink(self, destination):
+        return None
         # Find the link between agg and host, this depends on the destination
     
-    def findEdgeToDestinationLink(self,destination):
+    def findEdgeToDestinationLink(self, destination):
         # As per the indexing the destination id will br the link id
         return destination._id
     

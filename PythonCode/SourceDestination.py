@@ -7,4 +7,8 @@ class SourceDestination:
         self.pathList           = []
         
     def __repr__(self):
-        return '<SourceDestination _id: %s, source: %s, destination: %s\n pathList: %s\n>' %(self._id, self.source, self.destination, self.pathList)
+        return '<SourceDestination _id: %s,\n\
+source:%s,\ndestination: %s,\npathList: %s\n>' %(self._id, self.source, self.destination, self.pathList)
+
+    def addPath(self, path):
+        self.pathList.append(path)

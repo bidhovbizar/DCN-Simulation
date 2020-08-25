@@ -9,7 +9,7 @@ elephantServiceMean = 10
 elephantServiceType = 1
 
 miceBandwidth   = 1
-miceServiceShift = 0 
+miceServiceShift = 0
 miceServiceMean = 1 
 miceServiceType = 0
                  
@@ -34,9 +34,19 @@ topology = FatTreeTopology(systemParameters, numPorts)
 #print('\n')
 #print(topology.edgeList)
 #print('\n')
+#print(topology.edgeList[0].hostList)
+#print('\n')
+#print(topology.edgeList[0].aggList)
+#print('\n')
 #print(topology.aggList)
 #print('\n')
+#print(topology.aggList[0].edgeList)
+#print('\n')
+#print(topology.aggList[0].coreList)
+#print('\n')
 #print(topology.coreList)
+#print('\n')
+#print(topology.coreList[0].aggList)
 #print('\n')
 #print(topology.hostEdgeLinks)
 #print('\n')
@@ -48,4 +58,8 @@ topology = FatTreeTopology(systemParameters, numPorts)
 #print('\n')
 #print(topology.aggEdgeLinks)
 #print('\n')
-#
+#print(topology.edgeHostLinks)
+#print('\n')
+#print(topology.sourceDestinationDictionary.get('0:1'))
+#print('\n')
+#print(topology.sourceDestinationDictionary.get('0:1').pathList[0])
