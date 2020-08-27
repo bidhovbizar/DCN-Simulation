@@ -20,7 +20,7 @@ coreAggBandwidth = 4
 aggEdgeBandwidth = 5 
 edgeHostBandwidth = 6
 
-numPorts = 4
+numPorts = 6
 
 systemParameters = SystemParameters(flowArrivalRate, probElephantFlow,
 				 elephantBandwidth, elephantServiceShift, elephantServiceMean, elephantServiceType,
