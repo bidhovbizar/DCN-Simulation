@@ -46,8 +46,8 @@ class System:
                 <System # Flow in activeFlowList: %s,\n\
                 lastPathList: %s,\n\
                 nextArrivalTime: %s, nextDepartureTime: %s\n>' %(
-                SystemParameters.__repr__(self),
-                FatTreeTopology.__repr__(self),
+                self.systemParameters,
+                self.topology,
                 len(self.activeFlowList),
                 self.lastPathList,
                 self.nextArrivalTime, self.nextDepatureTime)

@@ -1,4 +1,3 @@
-
 class SourceDestination:
     def __init__(self, _id, source, destination):
         self._id                = _id

@@ -22,6 +22,14 @@ class Link:
         self.bandwidthUtilized  = 0
         self.flowList           = []
         
+    def addFlow(self, flow):
+        self.flowList.append(flow)
+        self.bandwidthUtilized += flow.bandwidth 
+        
+    def removeFlow(self, flow):
+        self.flowList.remove(flow)
+        self.bandwidthUtilized -= flow.bandwidth
+        
     def __repr__(self):
         if(self._type == 0):
             return '<Links _id: %s,\n Host : %s, Edge: %s,\n\
@@ -70,3 +78,5 @@ self.flowList)
                 self._id, self.input._id, self.output._id,
 self.bufferSize, self.delay, self.bandwidth, self.bandwidthUtilized,
 self.flowList)
+ 
+ 

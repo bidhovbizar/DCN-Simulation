@@ -8,7 +8,7 @@ class Elephant:
         self.lifeTime       = ShiftedParetoLifeTime(serviceMean, serviceShift)
 
     def __repr__(self):
-        return '<Elephant bandwidth: %s,serviceType: %s\n> %s' %(
+        return '< Elephant bandwidth: %s,serviceType: %s >\n%s' %(
                  self.bandwidth, self.serviceType, self.lifeTime)
 
 class Mice:
@@ -19,7 +19,7 @@ class Mice:
         self.lifeTime           = ShiftedExponentialLifeTime(serviceMean, serviceShift)
     
     def __repr__(self):
-        return '<Mice  bandwidth: %s, serviceType: %s\n>' %(
+        return '< Mice  bandwidth: %s, serviceType: %s >\n%s' %(
                 self.bandwidth, self.serviceType, self.lifeTime)
         
 class LinkBandwidth:
@@ -33,7 +33,7 @@ class LinkBandwidth:
         self.edgeHost         = edgeHost
     
     def __repr__(self):
-        return'<LinkBandwidth hostEdge: %s, edgeAgg: %s, aggCore: %s, coreAgg: %s, aggEdge: %s, edgeHost: %s\n>'%(
+        return'< LinkBandwidth hostEdge: %s, edgeAgg: %s, aggCore: %s, coreAgg: %s, aggEdge: %s, edgeHost: %s >'%(
                 self.hostEdge, self.edgeAgg, self.aggCore, self.coreAgg, self.aggEdge, self.edgeHost)
 
 class SystemParameters:
@@ -54,16 +54,16 @@ class SystemParameters:
         self.linkBandwidth      = LinkBandwidth(hostEdgeBandwidth, edgeAggBandwidth, aggCoreBandwidth, coreAggBandwidth, aggEdgeBandwidth, edgeHostBandwidth)
         
     def __repr__(self):
-        return  '<SystemParameters flowArrivalRate: %s, \n\
-                numFlows: %s, \n\
-                probElephantFlow: %s\n\
-                %s\n\
-                %s\n\
-                %s\n>' %(
-                self.flowArrivalRate,
-                self.numFlows,
-                self.probElephantFlow,
-                self.elephant,
-                self.mice,
-                self.linkBandwidth)
+        return  '< SystemParameters flowArrivalRate: %s, \n\
+numFlows: %s, \n\
+probElephantFlow: %s\n\
+%s\n\
+%s\n\
+%s\n>' %(
+        self.flowArrivalRate,
+        self.numFlows,
+        self.probElephantFlow,
+        self.elephant,
+        self.mice,
+        self.linkBandwidth)
 

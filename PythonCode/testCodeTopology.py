@@ -27,7 +27,8 @@ systemParameters = SystemParameters(flowArrivalRate, probElephantFlow,
                  miceBandwidth, miceServiceShift, miceServiceMean, miceServiceType,
                  hostEdgeBandwidth, edgeAggBandwidth, aggCoreBandwidth, coreAggBandwidth, aggEdgeBandwidth, edgeHostBandwidth)
 topology = FatTreeTopology(systemParameters, numPorts)
-
+                    
+                    
 #print(topology)
 #print('\n')
 #print(topology.hostList)
@@ -63,3 +64,5 @@ topology = FatTreeTopology(systemParameters, numPorts)
 #print(topology.sourceDestinationDictionary.get('0:1'))
 #print('\n')
 #print(topology.sourceDestinationDictionary.get('0:1').pathList[0])
+#print('\n')
+#print(topology.sourceDestinationDictionary.get('0:4').pathList[1])

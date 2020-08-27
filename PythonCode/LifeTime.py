@@ -8,7 +8,7 @@ class LifeTime:
         self.shift  = shift
     
     def __repr__(self):
-        return '<LifeTime mean: %s, shift: %s\n>' %(self.mean, self.shift)
+        return '< LifeTime mean: %s, shift: %s> \n' %(self.mean, self.shift)
 
 
 class ShiftedExponentialLifeTime(LifeTime):
@@ -18,7 +18,7 @@ class ShiftedExponentialLifeTime(LifeTime):
         self.rate   = 1.0/(self.mean-self.shift)
 	
     def __repr__(self):
-        return '%s \n <ShiftedExponentialLifeTime rate: %s\n>' %(LifeTime.__repr__(self), self.rate)
+        return '< ShiftedExponentialLifeTime mean: %s, shift: %s, rate: %s >' %(self.mean, self.shift, self.rate)
 
     def getDuration(self):
         return self.shift+random.expovariate(self.rate)
@@ -32,7 +32,7 @@ class ShiftedParetoLifeTime(LifeTime):
         self.shape  = self.mean/(self.mean - self.shift)
         
     def __repr__(self):
-        return '%s \n <ParetoLifeTime rate: %s, shape: %s\n>' %(LifeTime.__repr__(self), self.rate, self.shape)
+        return '< ParetoLifeTime mean: %s, shift: %s, rate: %s, shape: %s >' %(self.mean, self.shift, self.rate, self.shape)
 
     def getDuration(self):
         return self.shift+pareto.rvs(self.shape)
